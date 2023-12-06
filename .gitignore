@@ -1,0 +1,6 @@
+# Ignore the .db file and __pycache__ folder
+global-exclude *.db
+global-exclude __pycache__
+
+# Ignore the .env file
+global-exclude *.env
