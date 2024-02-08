@@ -6,9 +6,15 @@ class Database:
         self.cursor = self.conn.cursor()
 
 
+####################################################################################################
+# Get all books data
+####################################################################################################
+
+
     def get_all_books_data(self):
         query = """
             SELECT
+                Books.book_id,
                 Books.title,
                 Books.author,
                 GROUP_CONCAT(Subjects.subject_name, ', ') AS subjects,
@@ -31,6 +37,7 @@ class Database:
     def get_books_by_title(self, title):
         query = f"""
             SELECT
+                Books.book_id,
                 Books.title,
                 Books.author,
                 GROUP_CONCAT(Subjects.subject_name, ', ') AS subjects,
@@ -55,6 +62,7 @@ class Database:
     def get_books_by_author(self, author):
         query = """
             SELECT
+                Books.book_id,
                 Books.title,
                 Books.author,
                 GROUP_CONCAT(Subjects.subject_name, ', ') AS subjects,
@@ -80,6 +88,7 @@ class Database:
     def get_books_by_subject(self, subject):
         query = """
             SELECT
+                Books.book_id,
                 Books.title,
                 Books.author,
                 GROUP_CONCAT(Subjects.subject_name, ', ') AS subjects,
@@ -104,6 +113,7 @@ class Database:
     def get_books_by_location(self, location):
         query = """
             SELECT
+                Books.book_id,
                 Books.title,
                 Books.author,
                 GROUP_CONCAT(Subjects.subject_name, ', ') AS subjects,
@@ -128,6 +138,7 @@ class Database:
     def get_books_by_isbn(self, isbn):
         query = """
             SELECT
+                Books.book_id,
                 Books.title,
                 Books.author,
                 GROUP_CONCAT(Subjects.subject_name, ', ') AS subjects,
@@ -147,6 +158,113 @@ class Database:
         """
         self.cursor.execute(query, ("%" + isbn + "%",))
         return self.cursor.fetchall()
+    
+
+    def get_book_notes(self, book_id):
+        query = """
+            SELECT
+                notes
+            FROM
+                Books
+            WHERE
+                book_id = ?
+        """
+        self.cursor.execute(query, (book_id,))
+        return self.cursor.fetchone()[0]
+    
+
+####################################################################################################
+# Get subject data
+####################################################################################################
+
+    
+    def get_subjects_by_name(self, subject_name):
+        query = """
+            SELECT
+                subject_id,
+                subject_name
+            FROM
+                Subjects
+            WHERE
+                subject_name LIKE ?
+        """
+        self.cursor.execute(query, ("%" + subject_name + "%",))
+        return self.cursor.fetchall()
+    
+
+    def get_subjects(self):
+        query = """
+            SELECT
+                subject_id,
+                subject_name
+            FROM
+                Subjects
+        """
+        self.cursor.execute(query)
+        return self.cursor.fetchall()
+
+
+    def get_subject_id(self, subject_name):
+        query = """
+            SELECT
+                subject_id
+            FROM
+                Subjects
+            WHERE
+                subject_name = ?
+        """
+        self.cursor.execute(query, (subject_name[0],))
+        num = self.cursor.fetchone()
+        return num[0]
+    
+
+####################################################################################################
+# Get library data
+####################################################################################################
+
+    
+    def get_libraries_by_name(self, library_name):
+        query = """
+            SELECT
+                library_id,
+                name
+            FROM
+                Libraries
+            WHERE
+                name LIKE ?
+        """
+        self.cursor.execute(query, ("%" + library_name + "%",))
+        return self.cursor.fetchall()
+    
+    def get_libraries(self):
+        query = """
+            SELECT
+                library_id,
+                name
+            FROM
+                Libraries
+        """
+        self.cursor.execute(query)
+        return self.cursor.fetchall()
+
+
+    def get_library_id(self, library_name):
+        query = """
+            SELECT
+                library_id
+            FROM
+                Libraries
+            WHERE
+                name = ?
+        """
+        self.cursor.execute(query, (library_name.strip("{}"),))
+        num = self.cursor.fetchone()
+        return num[0]
+    
+
+####################################################################################################
+# Add data
+####################################################################################################
 
 
     def add_library(self, library_name):
@@ -179,56 +297,6 @@ class Database:
         return self.cursor.lastrowid
 
 
-    def get_libraries(self):
-        query = """
-            SELECT
-                name
-            FROM
-                Libraries
-        """
-        self.cursor.execute(query)
-        return self.cursor.fetchall()
-
-
-    def get_library_id(self, library_name):
-        query = """
-            SELECT
-                library_id
-            FROM
-                Libraries
-            WHERE
-                name = ?
-        """
-        self.cursor.execute(query, (library_name.strip("{}"),))
-        num = self.cursor.fetchone()
-        return num[0]
-
-
-    def get_subjects(self):
-        query = """
-            SELECT
-                subject_name
-            FROM
-                Subjects
-        """
-        self.cursor.execute(query)
-        return self.cursor.fetchall()
-
-
-    def get_subject_id(self, subject_name):
-        query = """
-            SELECT
-                subject_id
-            FROM
-                Subjects
-            WHERE
-                subject_name = ?
-        """
-        self.cursor.execute(query, (subject_name[0],))
-        num = self.cursor.fetchone()
-        return num[0]
-
-
     def add_book_subject(self, book_id, subject_id):
         query = """
             INSERT INTO BookSubjects (book_id, subject_id)
@@ -237,6 +305,34 @@ class Database:
         self.cursor.execute(query, (book_id, subject_id))
         self.conn.commit()
 
+
+####################################################################################################
+# Update data
+####################################################################################################
+        
+    
+    def update_book(self, book_id, title, author, location_id, isbn, copies, loaned, notes):
+        query = """
+            UPDATE Books
+            SET
+                title = ?,
+                author = ?,
+                library_id = ?,
+                isbn = ?,
+                copies = ?,
+                loaned = ?,
+                notes = ?
+            WHERE
+                book_id = ?
+        """
+        self.cursor.execute(query, (title, author, location_id, isbn, copies, loaned, notes, book_id))
+        self.conn.commit()
+
+
+####################################################################################################
+# Close connection
+####################################################################################################
+    
 
     def close_connection(self):
         self.conn.close()
