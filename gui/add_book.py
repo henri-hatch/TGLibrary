@@ -125,7 +125,12 @@ class AddBookWindow:
         db.close_connection()
 
         self.location_combobox["values"] = [library[0] for library in libraries]
-        self.location_combobox.current(0)  # Set the default selection
+
+        try:
+            self.location_combobox.current(0)  # Set the default selection
+        except Exception:
+            messagebox.showwarning("Error", "No libraries found. Please add a library first.")
+            self.parent.destroy()
 
     def populate_subjects_listbox(self):
         # Populate the subjects listbox with subject names

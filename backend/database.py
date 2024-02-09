@@ -1,7 +1,13 @@
 import sqlite3
 
 class Database:
-    def __init__(self, db_file="tgl.db"):
+    def __init__(self):
+        # Check database file name from config.ini
+        with open("config.ini", "r") as config_file:
+            lines = config_file.readlines()
+            
+        db_file = lines[0].split("=")[1].strip()
+
         self.conn = sqlite3.connect(db_file)
         self.cursor = self.conn.cursor()
 

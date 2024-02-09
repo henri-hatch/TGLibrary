@@ -4,3 +4,6 @@ global-exclude __pycache__
 
 # Ignore the .env file
 global-exclude *.env
+
+# Ignore the __pycache__ folder
+global-exclude __pycache__
