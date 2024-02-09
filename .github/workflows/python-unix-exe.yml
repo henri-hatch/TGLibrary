@@ -1,0 +1,49 @@
+name: Build Executables
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.11.7
+
+    - name: Install dependencies
+      run: |
+        pip install pyinstaller
+
+    - name: Build Windows Executable
+      run: |
+        pyinstaller --onefile main.py -o executables
+      shell: bash
+
+  build_mac:
+    runs-on: macos-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: 3.11.7
+
+    - name: Install dependencies
+      run: |
+        pip install pyinstaller
+
+    - name: Build macOS Executable
+      run: |
+        pyinstaller --onefile main.py -o executables
+      shell: bash
