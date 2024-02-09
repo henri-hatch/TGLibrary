@@ -24,7 +24,7 @@ jobs:
 
     - name: Build Windows Executable
       run: |
-        pyinstaller --onefile main.py -o executables
+        pyinstaller --onefile main.py --distpath executables --workpath extra_gunk --specpath extra_gunk
       shell: bash
 
   build_mac:
@@ -45,5 +45,5 @@ jobs:
 
     - name: Build macOS Executable
       run: |
-        pyinstaller --onefile main.py -o executables
+        pyinstaller --onefile main.py --distpath executables --workpath extra_gunk --specpath extra_gunk
       shell: bash
