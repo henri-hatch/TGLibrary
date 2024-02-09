@@ -1,9 +1,23 @@
 import sqlite3
+import os, sys
 
 class Database:
     def __init__(self):
-        # Check database file name from config.ini
-        with open("./library/config.ini", "r") as config_file:
+        current_directory = ""
+        if getattr(sys, 'frozen', False):
+            # Get the directory containing the current file
+            current_directory = os.path.dirname(sys.executable)
+        else:
+            # Get the absolute path of the script
+            current_directory = os.path.dirname(os.path.abspath(__file__))
+            current_directory = os.path.dirname(current_directory)
+
+        # Navigate up one directory to reach the parent directory
+
+        # Combine with the library directory to get the config file path
+        config_file_path = os.path.join(current_directory, "library", "config.ini")
+
+        with open(config_file_path, "r") as config_file:
             lines = config_file.readlines()
 
         db_file = lines[0].split("=")[1].strip()
