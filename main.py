@@ -5,14 +5,52 @@ import tkinter as tk
 import os
 import sqlite3
 
+SCHEMA = """
+CREATE TABLE IF NOT EXISTS "BookSubjects" (
+	"book_id"	INTEGER,
+	"subject_id"	INTEGER,
+	FOREIGN KEY("subject_id") REFERENCES "Subjects"("subject_id"),
+	FOREIGN KEY("book_id") REFERENCES "Books"("book_id")
+);
+CREATE TABLE IF NOT EXISTS "Books" (
+	"book_id"	INTEGER,
+	"library_id"	INTEGER,
+	"title"	TEXT NOT NULL,
+	"author"	TEXT,
+	"isbn"	TEXT,
+	"copies"	INTEGER NOT NULL,
+	"loaned"	TEXT NOT NULL,
+	"notes"	TEXT,
+	PRIMARY KEY("book_id" AUTOINCREMENT),
+	FOREIGN KEY("library_id") REFERENCES "Libraries"("library_id")
+);
+CREATE TABLE IF NOT EXISTS "Subjects" (
+	"subject_id"	INTEGER,
+	"subject_name"	TEXT NOT NULL,
+	"subject_notes"	TEXT,
+	PRIMARY KEY("subject_id")
+);
+CREATE TABLE IF NOT EXISTS "Libraries" (
+	"library_id"	INTEGER,
+	"name"	TEXT NOT NULL,
+	"notes"	TEXT,
+	PRIMARY KEY("library_id")
+);
+"""
+
 def check_files():
+    # Check if the library directory exists
+    if not os.path.exists("./library"):
+        print("Library directory not found. Creating a new one.")
+        os.mkdir("./library")
+        
     # Check if the config file exists
-    config_file_path = "config.ini"
+    config_file_path = "./library/config.ini"
     if not os.path.exists(config_file_path):
         print("Config file not found. Creating a new one.")
         # Create config file with a default database file path
-        with open(config_file_path, "w") as config_file:
-            config_file.write("PATH_TO_DB_FILE = tgl.db")
+        with open(config_file_path, "w+") as config_file:
+            config_file.write("PATH_TO_DB_FILE = ./library/tgl.db")
     else:
         print("Config file found. Importing...")
 
@@ -22,8 +60,8 @@ def check_files():
 
     # Check if the config file is empty and set a default path
     if not lines:
-        lines.append("PATH_TO_DB_FILE = tgl.db")
-        with open(config_file_path, "w") as config_file:
+        lines.append("PATH_TO_DB_FILE = ./library/tgl.db")
+        with open(config_file_path, "w+") as config_file:
             config_file.write(lines[0])
 
     # Extract the path to the database file from the config
@@ -33,14 +71,10 @@ def check_files():
     # Check if the database file exists - if not, create it from schema
     if not os.path.exists(path):
         print("Database file not found. Creating a new one.")
-        # Read schema from the file
-        with open("assets/schema.txt", "r") as schema_file:
-            schema = schema_file.read()
-
         # Create the database file using the schema
         with sqlite3.connect(path) as conn:
             cursor = conn.cursor()
-            cursor.executescript(schema)
+            cursor.executescript(SCHEMA)
 
         print("Database file created.")
     else:
