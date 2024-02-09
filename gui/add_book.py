@@ -121,17 +121,16 @@ class AddBookWindow:
     def populate_location_combobox(self):
         # Populate the location combobox with library names
         db = Database()
-        libraries = db.get_libraries()
+        libraries = db.get_library_names()
         db.close_connection()
 
-        for library in libraries:
-            self.location_combobox["values"] = libraries
-            self.location_combobox.current(0)  # Set the default selection
+        self.location_combobox["values"] = [library[0] for library in libraries]
+        self.location_combobox.current(0)  # Set the default selection
 
     def populate_subjects_listbox(self):
         # Populate the subjects listbox with subject names
         db = Database()
-        subjects = db.get_subjects()
+        subjects = db.get_subject_names()
         db.close_connection()
 
         for subject in subjects:

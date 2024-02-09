@@ -73,7 +73,8 @@ class EditBookWindow:
         self.populate_notes_text()
 
         # Buttons
-        self.confirm_button = ttk.Button(parent, text="Confirm", command=self.update_book_record)
+        self.confirm_button = ttk.Button(parent, text="Save", command=self.update_book_record)
+        self.delete_button = ttk.Button(parent, text="Delete", command=self.delete_book_record)
         self.cancel_button = ttk.Button(parent, text="Cancel", command=self.cancel)
 
         # Grid layout
@@ -93,7 +94,8 @@ class EditBookWindow:
         self.notes_label.grid(row=7, column=0, padx=5, pady=5, sticky="ne")
         self.notes_text.grid(row=7, column=1, padx=5, pady=5, sticky="w")
         self.confirm_button.grid(row=8, column=0, columnspan=2, pady=10)
-        self.cancel_button.grid(row=9, column=0, columnspan=2, pady=10)
+        self.delete_button.grid(row=9, column=0, columnspan=2, pady=10)
+        self.cancel_button.grid(row=10, column=0, columnspan=2, pady=10)
 
         # Populate the entry fields
         self.populate_entry_fields()
@@ -122,7 +124,7 @@ class EditBookWindow:
     def populate_subjects_listbox(self):
         # Get the subjects from the database
         db = Database()
-        subjects = db.get_subjects()
+        subjects = db.get_subject_names()
         db.close_connection()
 
         # Populate the subjects listbox
@@ -132,12 +134,11 @@ class EditBookWindow:
     def populate_location_combobox(self):
         # Get the libraries from the database
         db = Database()
-        libraries = db.get_libraries()
+        libraries = db.get_library_names()
         db.close_connection()
 
-        # Populate the location combobox
-        for library in libraries:
-            self.location_combobox["values"] = libraries
+        # Populate the location combobox with library names without brackets
+        self.location_combobox["values"] = [library[0] for library in libraries]
 
 
         # Select the location for the book
@@ -185,8 +186,45 @@ class EditBookWindow:
         db.update_book(self.id, title, author, location_id, isbn, copies, loaned, notes)
         db.close_connection()
 
+        # Update the subjects for the book
+        selected_subjects = []
+        selected_subjects = self.subjects_listbox.curselection()
+
+        self.update_book_subjects(selected_subjects)
+
+
         messagebox.showinfo("Success", "Book updated successfully.")
         self.parent.destroy()
+
+    def update_book_subjects(self, selected_subjects):
+        db = Database()
+        db.delete_book_subjects(self.id)
+
+        for subject in selected_subjects:
+            subject_id = db.get_subject_id(self.subjects_listbox.get(subject))
+            db.add_book_subject(self.id, subject_id)
+
+        db.close_connection()
+
+    def delete_book_record(self):
+        # Confirm the deletion
+        confirm = messagebox.askyesno("Confirm", "Are you sure you want to delete this book?")
+
+        if confirm:
+            # Initialize DB
+            db = Database()
+
+            # Delete the book
+            db.delete_book(self.id)
+
+            # Delete the book subjects
+            db.delete_book_subjects(self.id)
+
+            # Close DB connection
+            db.close_connection()
+
+            messagebox.showinfo("Success", "Book deleted successfully.")
+            self.parent.destroy()
 
     def cancel(self):
         self.parent.destroy()

@@ -202,6 +202,16 @@ class Database:
         """
         self.cursor.execute(query)
         return self.cursor.fetchall()
+    
+    def get_subject_names(self):
+        query = """
+            SELECT
+                subject_name
+            FROM
+                Subjects
+        """
+        self.cursor.execute(query)
+        return self.cursor.fetchall()
 
 
     def get_subject_id(self, subject_name):
@@ -216,6 +226,18 @@ class Database:
         self.cursor.execute(query, (subject_name[0],))
         num = self.cursor.fetchone()
         return num[0]
+    
+    def get_subject_notes(self, subject_id):
+        query = """
+            SELECT
+                subject_notes
+            FROM
+                Subjects
+            WHERE
+                subject_id = ?
+        """
+        self.cursor.execute(query, (subject_id,))
+        return self.cursor.fetchone()[0]
     
 
 ####################################################################################################
@@ -246,6 +268,16 @@ class Database:
         """
         self.cursor.execute(query)
         return self.cursor.fetchall()
+    
+    def get_library_names(self):
+        query = """
+            SELECT
+                name
+            FROM
+                Libraries
+        """
+        self.cursor.execute(query)
+        return self.cursor.fetchall()
 
 
     def get_library_id(self, library_name):
@@ -257,9 +289,21 @@ class Database:
             WHERE
                 name = ?
         """
-        self.cursor.execute(query, (library_name.strip("{}"),))
+        self.cursor.execute(query, (library_name,))
         num = self.cursor.fetchone()
         return num[0]
+    
+    def get_library_notes(self, library_id):
+        query = """
+            SELECT
+                notes
+            FROM
+                Libraries
+            WHERE
+                library_id = ?
+        """
+        self.cursor.execute(query, (library_id,))
+        return self.cursor.fetchone()[0]
     
 
 ####################################################################################################
@@ -276,12 +320,12 @@ class Database:
         self.conn.commit()
 
 
-    def add_subject(self, subject_name):
+    def add_subject(self, subject_name, subject_notes):
         query = """
-            INSERT INTO Subjects (subject_name)
-            VALUES (?)
+            INSERT INTO Subjects (subject_name, subject_notes)
+            VALUES (?, ?)
         """
-        self.cursor.execute(query, (subject_name,))
+        self.cursor.execute(query, (subject_name, subject_notes))
         self.conn.commit()
 
 
@@ -326,6 +370,71 @@ class Database:
                 book_id = ?
         """
         self.cursor.execute(query, (title, author, location_id, isbn, copies, loaned, notes, book_id))
+        self.conn.commit()
+
+    def update_subject(self, subject_id, subject_name, subject_notes):
+        query = """
+            UPDATE Subjects
+            SET
+                subject_name = ?,
+                subject_notes = ?
+            WHERE
+                subject_id = ?
+        """
+        self.cursor.execute(query, (subject_name, subject_notes, subject_id))
+        self.conn.commit()
+
+    def update_library(self, library_id, library_name, library_notes):
+        query = """
+            UPDATE Libraries
+            SET
+                name = ?,
+                notes = ?
+            WHERE
+                library_id = ?
+        """
+        self.cursor.execute(query, (library_name, library_notes, library_id))
+        self.conn.commit()
+
+
+####################################################################################################
+# Delete data
+####################################################################################################
+        
+    def delete_book(self, book_id):
+        query = """
+            DELETE FROM Books
+            WHERE
+                book_id = ?
+        """
+        self.cursor.execute(query, (book_id,))
+        self.conn.commit()
+
+    def delete_subject(self, subject_id):
+        query = """
+            DELETE FROM Subjects
+            WHERE
+                subject_id = ?
+        """
+        self.cursor.execute(query, (subject_id,))
+        self.conn.commit()
+
+    def delete_library(self, library_id):
+        query = """
+            DELETE FROM Libraries
+            WHERE
+                library_id = ?
+        """
+        self.cursor.execute(query, (library_id,))
+        self.conn.commit()
+
+    def delete_book_subjects(self, book_id):
+        query = """
+            DELETE FROM BookSubjects
+            WHERE
+                book_id = ?
+        """
+        self.cursor.execute(query, (book_id,))
         self.conn.commit()
 
 

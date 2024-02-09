@@ -11,6 +11,8 @@ from gui.add_subject import AddSubjectWindow
 from gui.add_book import AddBookWindow
 
 from gui.edit_book import EditBookWindow
+from gui.edit_library import EditLibraryWindow
+from gui.edit_subject import EditSubjectWindow
 
 class MainWindow:
     def __init__(self, root):
@@ -50,7 +52,7 @@ class MainWindow:
         self.filter_dropdown = ttk.Combobox(self.root, values=["Title", "Author", "Subject", "Location", "ISBN"],
                                             textvariable=self.filter_var)
         self.submit_button = ttk.Button(self.root, text="Submit", command=self.filter)
-        self.clear_button = ttk.Button(self.root, text="Clear", command=self.clear_filter)
+        self.clear_button = ttk.Button(self.root, text="Clear/Refresh", command=self.clear_filter)
 
         # Button to open a new window to add a new book, library, or subject
         self.add_button = ttk.Button(self.root, text="Add", command=self.open_add_window)
@@ -64,7 +66,7 @@ class MainWindow:
         self.submit_button.grid(row=0, column=3, padx=5, pady=5)
         self.clear_button.grid(row=0, column=4, padx=5, pady=5)
         self.add_button.grid(row=5, column=0, columnspan=4, pady=20, padx=(0, 120))
-        self.edit_button.grid(row=5, column=4, pady=20, padx=5)
+        self.edit_button.grid(row=5, column=3, pady=20, padx=5)
 
 
 ############################################################################################################
@@ -262,16 +264,17 @@ class MainWindow:
 
         if selected_tab == 0:
             # Open window for adding a book
-            book_window = tk.Toplevel(self.root)
-            AddBookWindow(book_window)
+            book_add_window = tk.Toplevel(self.root)
+            AddBookWindow(book_add_window)
         elif selected_tab == 1:
             # Open window for adding a subject
-            subject_window = tk.Toplevel(self.root)
-            AddSubjectWindow(subject_window)
+            subject_add_window = tk.Toplevel(self.root)
+            AddSubjectWindow(subject_add_window)
         elif selected_tab == 2:
             # Open window for adding a library
-            library_window = tk.Toplevel(self.root)
-            AddLibraryWindow(library_window)
+            library_add_window = tk.Toplevel(self.root)
+            AddLibraryWindow(library_add_window)
+
 
     def open_edit_window(self):
         # Open window for editing either book, library, or subject
@@ -281,38 +284,48 @@ class MainWindow:
 
         # Check what is selected in the table based on the selected tab
         if selected_tab == 0:
-            selected_item = self.booktree.selection()[0]
+            try:
+                selected_item = self.booktree.selection()[0]
+            except Exception:
+                messagebox.showwarning("Error", "Please select a book to edit.")
+                return
 
             # Get the data from the selected row
             book_data = self.booktree.item(selected_item, "values")
             print(book_data)
 
+            book_edit_window = tk.Toplevel(self.root)
+            EditBookWindow(book_edit_window, book_data)
+
         elif selected_tab == 1:
-            selected_item = self.subjecttree.selection()[0]
+            try:
+                selected_item = self.subjecttree.selection()[0]
+            except Exception:
+                messagebox.showwarning("Error", "Please select a subject to edit.")
+                return
 
             # Get the data from the selected row
             subject_data = self.subjecttree.item(selected_item, "values")
             print(subject_data)
 
+            subject_edit_window = tk.Toplevel(self.root)
+            EditSubjectWindow(subject_edit_window, subject_data)
+
         elif selected_tab == 2:
-            selected_item = self.librarytree.selection()[0]
+            try:
+                selected_item = self.librarytree.selection()[0]
+            except Exception:
+                messagebox.showwarning("Error", "Please select a library to edit.")
+                return
 
             # Get the data from the selected row
             library_data = self.librarytree.item(selected_item, "values")
             print(library_data)
 
-        
-        # Open window for editing either book, library, or subject with the data from the selected row
-        if selected_tab == 0:
-            book_window = tk.Toplevel(self.root)
-            EditBookWindow(book_window, book_data)
-        # elif selected_tab == 1:
-        #     subject_window = tk.Toplevel(self.root)
-        #     EditSubjectWindow(subject_window, subject_data)
-        # elif selected_tab == 2:
-        #     library_window = tk.Toplevel(self.root)
-        #     EditLibraryWindow(library_window, library_data)
-        
+            library_edit_window = tk.Toplevel(self.root)
+            EditLibraryWindow(library_edit_window, library_data)
+
+
 
 ############################################################################################################
 # Search Bar and Filter Options
@@ -328,6 +341,7 @@ class MainWindow:
         if not self.search_entry.get():
             self.search_entry.insert(0, "Search...")
             self.search_entry.config(fg="grey")  # Change text color to grey
+
 
 if __name__ == "__main__":
     root = tk.Tk()
