@@ -245,6 +245,7 @@ class MainWindow:
         for library in libraries_data:
             self.librarytree.insert("", "end", values=library)
 
+    # Clear the filter and refresh the table
     def clear_filter(self):
         self.populate_books_tab()
         self.populate_libraries_tab()
